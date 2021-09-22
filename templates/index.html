@@ -119,15 +119,16 @@
 			var send = document.getElementById("send")
 			var linkShorten = document.getElementById("link-shorten")
 			var btnCopy = document.getElementById("btn-copy")
-			url.addEventListener("input",(e)=>{
-				longUrl.innerHTML = e.target.value
-			})
 			send.addEventListener("click",(e)=>{
-				postShort("/short",{long:`${longUrl.innerHTML}`})
+				linkShorten.innerHTML = ''
+				linkShorten.href = ''
+				postShort("/short/create",{long:`${url.value}`})
 				.then(data=> {
+					longUrl.innerHTML = url.value
 					linkShorten.innerHTML = data.shortlink
 					linkShorten.href = data.shortlink
 					btnCopy.style.opacity = '1'
+					url.value = ''
 				})
 			})
 

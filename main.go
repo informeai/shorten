@@ -2,9 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/informeai/shorten/base62"
+	"github.com/informeai/shorten/entities"
+	"github.com/informeai/shorten/store"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 )
 
@@ -33,8 +38,21 @@ func shortLinks(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	//create shortlink here...
-	short := ShortLink{Short: "www.informeai.com.br"}
+	//create rando uint64 and encode link.
+	rndUint64 := rand.Uint64()
+	shortlink := base62.Encode(rndUint64)
+
+	//create shorten struct
+	srt := entities.Shorten{Id: string(rndUint64), Url: long.Long, Visits: 0}
+	//Insert to database
+	db := store.NewStore()
+	err = db.Insert(srt)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	shortlink = fmt.Sprintf("http://localhost:8000/%v", shortlink)
+	short := ShortLink{Short: shortlink}
 	jsonBytes, err := json.Marshal(short)
 	if err != nil {
 		log.Println(err)
@@ -43,9 +61,31 @@ func shortLinks(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonBytes)
 }
 
+func redirectUrl(w http.ResponseWriter, r *http.Request) {
+	var shortlink string
+	vars := mux.Vars(r)
+	shortlink = vars["shortlink"]
+	//decode shortlink
+	id, err := base62.Decode(shortlink)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	//get store and verify if exists shortlink
+	db := store.NewStore()
+	srt, err := db.Get(string(id))
+	log.Println(srt)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	http.Redirect(w, r, srt.Url, 302)
+}
+
 func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/", serveIndex).Methods("GET")
-	router.HandleFunc("/short", shortLinks).Methods("POST")
+	router.HandleFunc("/short/create", shortLinks).Methods("POST")
+	router.HandleFunc("/{shortlink}", redirectUrl)
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
