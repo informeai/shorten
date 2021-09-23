@@ -1,7 +1,9 @@
 package store
 
 import (
+	"context"
 	"database/sql"
+	"fmt"
 	"github.com/informeai/shorten/entities"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
@@ -11,6 +13,7 @@ import (
 type Shortener interface {
 	Get(id string) (entities.Shorten, error)
 	Insert(srt entities.Shorten) error
+	Update(srt entities.Shorten) error
 }
 
 //Store is struct for db.
@@ -24,7 +27,7 @@ func NewStore() *Store {
 	if err != nil {
 		log.Fatal(err)
 	}
-	stmt, err := db.Prepare("CREATE TABLE IF NOT EXISTS short (id VARCHAR(64), url VARCHAR(255), visits INTEGER)")
+	stmt, err := db.Prepare("CREATE TABLE IF NOT EXISTS short (id VARCHAR(255) PRIMARY KEY, url VARCHAR(255), visits INTEGER)")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,7 +41,7 @@ func NewStore() *Store {
 //Get return first Shorten from database.
 func (s *Store) Get(id string) (entities.Shorten, error) {
 	srt := entities.Shorten{}
-	rows, err := s.db.Query("SELECT * FROM short")
+	rows, err := s.db.QueryContext(context.Background(), "SELECT * FROM short")
 	defer rows.Close()
 	if err != nil {
 		return srt, err
@@ -49,10 +52,12 @@ func (s *Store) Get(id string) (entities.Shorten, error) {
 
 	for rows.Next() {
 		err = rows.Scan(&storeId, &storeUrl, &storeVisits)
+
 		if err != nil {
 			return srt, err
 		}
 		if id == storeId {
+			fmt.Printf("Id: %v - Url: %v - Visits: %v\n", storeId, storeUrl, storeVisits)
 			srt.Id = storeId
 			srt.Url = storeUrl
 			srt.Visits = storeVisits
@@ -60,7 +65,6 @@ func (s *Store) Get(id string) (entities.Shorten, error) {
 
 		}
 	}
-	storeId = ""
 
 	return srt, nil
 }
@@ -77,4 +81,17 @@ func (s *Store) Insert(srt entities.Shorten) error {
 	}
 	return nil
 
+}
+
+//Update change the shorten and save in database.
+func (s *Store) Update(srt entities.Shorten) error {
+	stmt, err := s.db.Prepare("UPDATE short SET visits=? WHERE id=?")
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(srt.Visits+1, srt.Id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
