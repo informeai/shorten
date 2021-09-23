@@ -11,6 +11,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strconv"
 )
 
 //ShortLink struct of return links shortening.
@@ -43,7 +44,7 @@ func shortLinks(w http.ResponseWriter, r *http.Request) {
 	shortlink := base62.Encode(rndUint64)
 
 	//create shorten struct
-	srt := entities.Shorten{Id: string(rndUint64), Url: long.Long, Visits: 0}
+	srt := entities.Shorten{Id: strconv.FormatUint(rndUint64, 10), Url: long.Long, Visits: 0}
 	//Insert to database
 	db := store.NewStore()
 	err = db.Insert(srt)
@@ -73,8 +74,13 @@ func redirectUrl(w http.ResponseWriter, r *http.Request) {
 	}
 	//get store and verify if exists shortlink
 	db := store.NewStore()
-	srt, err := db.Get(string(id))
-	log.Println(srt)
+	srt, err := db.Get(strconv.FormatUint(id, 10))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	//update visits
+	err = db.Update(srt)
 	if err != nil {
 		log.Println(err)
 		return

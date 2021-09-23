@@ -3,7 +3,6 @@ package store
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/informeai/shorten/entities"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
@@ -57,7 +56,6 @@ func (s *Store) Get(id string) (entities.Shorten, error) {
 			return srt, err
 		}
 		if id == storeId {
-			fmt.Printf("Id: %v - Url: %v - Visits: %v\n", storeId, storeUrl, storeVisits)
 			srt.Id = storeId
 			srt.Url = storeUrl
 			srt.Visits = storeVisits
