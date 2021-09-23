@@ -60,7 +60,7 @@
 		}
 		section#result-shorten{
 			display: flex;
-			width: 84%;
+			width: 81%;
 			height: 50px;
 			align-items: center;
 			justify-content: space-between;
@@ -130,6 +130,13 @@
 					btnCopy.style.opacity = '1'
 					url.value = ''
 				})
+			})
+
+			//copy to clipboard
+			btnCopy.addEventListener("click", (e)=>{
+				if(linkShorten.innerHTML !== ""){
+					navigator.clipboard.writeText(linkShorten.innerHTML)
+				}
 			})
 
 			//fetch
