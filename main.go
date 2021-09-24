@@ -46,7 +46,7 @@ func shortLinks(w http.ResponseWriter, r *http.Request) {
 	//create shorten struct
 	srt := entities.Shorten{Id: strconv.FormatUint(rndUint64, 10), Url: long.Long, Visits: 0}
 	//Insert to database
-	db := store.NewStoreSqlite()
+	db := store.NewStoreMongodb()
 	err = db.Insert(srt)
 	if err != nil {
 		log.Println(err)
@@ -73,7 +73,7 @@ func redirectUrl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//get store and verify if exists shortlink
-	db := store.NewStoreSqlite()
+	db := store.NewStoreMongodb()
 	srt, err := db.Get(strconv.FormatUint(id, 10))
 	if err != nil {
 		log.Println(err)

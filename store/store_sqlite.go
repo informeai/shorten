@@ -14,7 +14,7 @@ type StoreSqlite struct {
 }
 
 //NewStoreSqlite return instance the StoreSqlite.
-func NewStoreSqlite() *Store {
+func NewStoreSqlite() *StoreSqlite {
 	db, err := sql.Open("sqlite3", "./shortlinks.db")
 	if err != nil {
 		log.Fatal(err)
@@ -27,7 +27,7 @@ func NewStoreSqlite() *Store {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return &Store{db: db}
+	return &StoreSqlite{db: db}
 }
 
 //Get return first Shorten from database.
