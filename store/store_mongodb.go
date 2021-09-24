@@ -2,17 +2,16 @@ package store
 
 import (
 	"context"
+	"github.com/informeai/shorten/config"
 	"github.com/informeai/shorten/entities"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"log"
+	"os"
 	"time"
 )
-
-//uri for connection database
-const uri = "mongodb://localhost:27017/"
 
 //StoreMongodb is struct for db mongodb
 type StoreMongodb struct {
@@ -23,8 +22,10 @@ type StoreMongodb struct {
 
 //NewStoreMongodb return instance the StoreMongodb
 func NewStoreMongodb() *StoreMongodb {
+	config.LoadEnvs()
+	mongoUri := os.Getenv("MONGO_URI")
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	c, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	c, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoUri))
 	if err != nil {
 		log.Fatal(err)
 	}
