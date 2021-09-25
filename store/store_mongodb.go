@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"github.com/informeai/shorten/config"
 	"github.com/informeai/shorten/entities"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -22,7 +21,6 @@ type StoreMongodb struct {
 
 //NewStoreMongodb return instance the StoreMongodb
 func NewStoreMongodb() *StoreMongodb {
-	config.LoadEnvs()
 	mongoUri := os.Getenv("MONGO_URI")
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	c, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoUri))

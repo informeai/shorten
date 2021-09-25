@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/informeai/shorten/base62"
+	"github.com/informeai/shorten/config"
 	"github.com/informeai/shorten/entities"
 	"github.com/informeai/shorten/store"
 	"io/ioutil"
@@ -89,6 +90,7 @@ func redirectUrl(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	config.LoadEnvs()
 	router := mux.NewRouter()
 	router.HandleFunc("/", serveIndex).Methods("GET")
 	router.HandleFunc("/short/create", shortLinks).Methods("POST")
