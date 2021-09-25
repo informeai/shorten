@@ -101,7 +101,7 @@
 			<h1> Shorten </h1>
 		</section>
 		<section id="form-shorten">
-			<input id="url" type="text" placeholder="Shorten your Link" />
+			<input id="url" type="text" placeholder="http://example.com" />
 			<input id="send" type="button" value="Shorten" />
 		</section>
 		<section id="result-shorten">
@@ -119,17 +119,34 @@
 			var send = document.getElementById("send")
 			var linkShorten = document.getElementById("link-shorten")
 			var btnCopy = document.getElementById("btn-copy")
+			//verify start url
+			url.addEventListener("input",(e)=>{
+				if(url.value.startsWith("http://") || url.value.startsWith("https://") || url.value === ""){
+					url.style.border = "none";
+				}else{
+					url.style.border = "solid 1px red"
+				}
+			})
+			
+			//send
 			send.addEventListener("click",(e)=>{
 				linkShorten.innerHTML = ''
 				linkShorten.href = ''
-				postShort("/short/create",{long:`${url.value}`})
-				.then(data=> {
-					longUrl.innerHTML = url.value
-					linkShorten.innerHTML = data.shortlink
-					linkShorten.href = data.shortlink
-					btnCopy.style.opacity = '1'
-					url.value = ''
-				})
+				if(url.value.startsWith("http://") || url.value.startsWith("https://")){
+					postShort("/short/create",{long:`${url.value}`})
+						.then(data=> {
+							longUrl.innerHTML = url.value
+							linkShorten.innerHTML = data.shortlink
+							linkShorten.href = data.shortlink
+							btnCopy.style.opacity = '1'
+							url.value = ''
+						})
+				}else{
+					alert("Url bad formated.")
+					url.value = ""
+					url.style.border = "none"
+				}
+				
 			})
 
 			//copy to clipboard
